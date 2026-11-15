@@ -1,0 +1,32 @@
+﻿{
+    "Hierarchy":  {
+                      "ENVIRONMENT_BASE":  {
+                                               "Hex":  "#D97724",
+                                               "ShadowHex":  "#132A2E",
+                                               "Role":  "Golden Hour Sunset / Deep Teal Industrial Shadows"
+                                           },
+                      "THE_COLLECTIVE":  {
+                                             "Hex":  "#F4F6F8",
+                                             "SecondaryHex":  "#0B0D10",
+                                             "Role":  "Sterile Corporate White / Black"
+                                         },
+                      "V_SENTINEL":  {
+                                         "Hex":  "#00F0FF",
+                                         "Role":  "Signature Cyan Circuitry - Exclusive to V-SENTINEL"
+                                     },
+                      "SENTINEL_DRONES":  {
+                                              "Hex":  "#FF9E00",
+                                              "Role":  "Amber Circuitry Veins (6-Unit Formation)"
+                                          },
+                      "ECHO":  {
+                                   "Hex":  "#1E90FF",
+                                   "Role":  "Optical Blue Lens \u0026 Holograms"
+                               }
+                  },
+    "PaletteName":  "INFINITY_CORE_V2_SOVEREIGN_PULSE",
+    "Status":  "ACTIVE_ENFORCED",
+    "Rules":  [
+                  "Cyan (#00F0FF) belongs ONLY to V-SENTINEL.",
+                  "Retire Act I washed-out monochrome; grade all active scenes in high-contrast teal/amber/cyan."
+              ]
+}

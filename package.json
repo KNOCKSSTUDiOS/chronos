@@ -1,0 +1,17 @@
+{
+  "name": "knocks-studios",
+  "version": "1.0.0",
+  "private": true,
+  "bin": "OmniGen/app.py",
+  "pkg": {
+    "assets": [
+      "OmniGen/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ]
+  },
+  "dependencies": {
+    "@omnimedia/omnitool": "^1.1.0-146"
+  }
+}

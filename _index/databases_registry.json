@@ -1,0 +1,14 @@
+﻿[
+    {
+        "Endpoint":  "D:\\KNOCKS_CLOUD_DB",
+        "DatabaseName":  "PRIMARY_MARKETPLACE_CLOUD_DB",
+        "Active":  true,
+        "Role":  "Direct Render Output \u0026 Temp Cache (Zero Laptop Disk Usage)"
+    },
+    {
+        "Endpoint":  "C:\\KNOCKSSTUDiOS\\_index\\master_asset_database.json",
+        "DatabaseName":  "STUDIO_MASTER_CATALOG_DB",
+        "Active":  true,
+        "Role":  "Lightweight Search Index (Metadata Only)"
+    }
+]
