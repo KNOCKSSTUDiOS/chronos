@@ -13,5 +13,11 @@
   },
   "dependencies": {
     "@omnimedia/omnitool": "^1.1.0-146"
+  },
+  "allowScripts": {
+    "protobufjs@7.6.6": true
+  },
+  "scripts": {
+    "dev": "vite"
   }
 }

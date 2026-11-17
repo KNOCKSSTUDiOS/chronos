@@ -1,0 +1,11 @@
+﻿{
+    "Palette":  "INFINITY_CORE_V2_SOVEREIGN_PULSE",
+    "BridgeTarget":  "GemML_Engine_Sync",
+    "MasterIndex":  "C:\\KNOCKSSTUDiOS\\_index\\recovered_ai_apps_index.json",
+    "RecoveredApps":  "C:\\KNOCKSSTUDiOS\\RECOVERED_APPS",
+    "SoulQ44Root":  "C:\\KNOCKSSTUDiOS\\soul-q44",
+    "AiEnginesRoot":  "C:\\KNOCKSSTUDiOS\\AI_ENGINES",
+    "TotalRecovered":  32,
+    "Status":  "ACTIVE_HOOKED",
+    "VaultDrive":  "V:\\"
+}
