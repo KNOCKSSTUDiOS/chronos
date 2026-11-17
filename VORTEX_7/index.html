@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KNOCKSSTUDiOS™ </title>
+<link rel="icon" type="image/png" href="assets/vortex_7_main_icon.png">
+<link rel="manifest" href="app/manifest.webmanifest">
+<meta name="theme-color" content="#FF2A85">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #030406;
+    color: #F0F4F8;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    touch-action: pan-y;
+    user-select: none;
+  }
+
+  #three-cube-stage {
+    position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 2; pointer-events: none;
+  }
+
+  #pages-wrapper {
+    position: relative; z-index: 15; width: 100vw; height: 100vh;
+    transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  section.panel {
+    width: 100vw; height: 100vh; padding: 42px 54px 92px 54px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    background: transparent; border: none; overflow-y: auto;
+  }
+
+  #home { pointer-events: none; }
+
+  .obsidian-3d-title {
+    font-size: clamp(2.8rem, 6vw, 4.6rem);
+    font-weight: 900; letter-spacing: 12px; text-transform: uppercase;
+    background: linear-gradient(160deg, #3A414A 0%, #090B0E 36%, #2C333C 50%, #060709 78%, #48505A 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.24);
+    filter: drop-shadow(0 1px 0 #4B535E) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.98));
+  }
+
+  .obsidian-3d-sub {
+    margin-top: 6px; font-size: 0.9rem; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: rgba(235, 240, 245, 0.85);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.98);
+  }
+
+  .oscillator-strip { width: 100%; height: 92px; margin: 18px 0; background: transparent; border: none; }
+
+  .tile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; }
+  @media (max-width: 820px) {
+    .tile-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    section.panel { padding: 28px 24px 84px 24px; }
+  }
+
+  .tile {
+    background: rgba(6, 8, 12, 0.65); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1); outline: none; padding: 18px 16px;
+    cursor: pointer; transition: transform 0.25s ease, filter 0.25s ease, background 0.25s ease;
+    text-decoration: none; display: block; text-align: left;
+  }
+  .tile:hover, .tile:active {
+    transform: translateY(-4px) scale(1.02);
+    background: rgba(14, 18, 26, 0.85);
+    border-color: rgba(255, 42, 133, 0.4);
+    filter: drop-shadow(0 0 14px rgba(255, 42, 133, 0.55));
+  }
+
+  .tile .tag {
+    font-size: 0.78rem; font-weight: 900; letter-spacing: 3px; text-transform: uppercase;
+    background: linear-gradient(90deg, #FF2A85 0%, #D438FF 50%, #FF6B4A 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px;
+  }
+  .tile h3 {
+    font-size: 1.15rem; font-weight: 900; letter-spacing: 2.5px; text-transform: uppercase;
+    color: #F0F4F8; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.98);
+  }
+  .tile p {
+    margin-top: 5px; font-size: 0.8rem; color: rgba(235, 240, 245, 0.85);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.98);
+  }
+
+  .engine-console {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+    padding: 14px 18px; background: rgba(6, 8, 12, 0.8); backdrop-filter: blur(12px);
+    margin-top: 10px; border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .engine-console input, .engine-console select {
+    background: rgba(16, 20, 28, 0.9); color: #F0F4F8;
+    border: 1px solid rgba(255, 255, 255, 0.15); padding: 10px 14px;
+    font-size: 0.82rem; letter-spacing: 1px; flex: 1; min-width: 200px; outline: none;
+  }
+  .engine-action {
+    cursor: pointer; padding: 10px 20px; font-size: 0.78rem; font-weight: 900;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    background: linear-gradient(90deg, #FF2A85 0%, #D438FF 50%, #FF6B4A 100%);
+    color: #FFFFFF; border: none; transition: transform 0.2s ease;
+  }
+  .engine-action:hover { transform: scale(1.03); }
+
+  .status-readout { font-size: 0.76rem; letter-spacing: 1.5px; color: #00F0FF; font-weight: 700; width: 100%; }
+
+  .video-stage { width: 100%; max-width: 1080px; margin: 0 auto; aspect-ratio: 16 / 9; position: relative; }
+  .video-stage video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .shuffle-bar { display: flex; align-items: center; justify-content: center; gap: 32px; margin-top: 16px; }
+  .shuffle-bar span {
+    cursor: pointer; font-size: 0.88rem; font-weight: 900; letter-spacing: 3.5px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #9AA2AC 50%, #23272E 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.95));
+  }
+
+  /* Bottom Dock: 4 clean items + Printify + Burger Menu, auto-hides */
+  .bottom-dock {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 58px; padding: 0 36px;
+    display: flex; align-items: center; justify-content: space-between; z-index: 60;
+    background: rgba(4, 5, 7, 0.85); backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; transition: opacity 0.35s ease;
+  }
+  body:hover .bottom-dock, .bottom-dock:hover, .bottom-dock.touch-active { opacity: 1; }
+
+  .trademark-carved {
+    font-size: 1.08rem; font-weight: 900; letter-spacing: 4px; text-transform: uppercase;
+    background: linear-gradient(175deg, #4E5662 0%, #0D1015 46%, #3A414B 52%, #07080B 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 0.85px rgba(255, 255, 255, 0.32);
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.98)); cursor: pointer;
+  }
+
+  .bottom-nav { display: flex; align-items: center; gap: 26px; }
+  .bottom-nav a, .burger-trigger {
+    text-decoration: none; cursor: pointer; font-size: 0.78rem; font-weight: 900; letter-spacing: 2.8px;
+    text-transform: uppercase; background: linear-gradient(180deg, #FFFFFF 0%, #B4BCC6 50%, #3E444D 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.98)); transition: transform 0.2s ease, filter 0.2s ease;
+  }
+  .bottom-nav a:hover, .burger-trigger:hover {
+    transform: translateY(-2px); filter: drop-shadow(0 0 10px rgba(255, 42, 133, 0.85));
+  }
+
+  .social-logo-bar { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+  .social-logo-bar a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; background: rgba(16, 20, 28, 0.85); border-radius: 50%;
+    transition: transform 0.2s ease, background 0.2s ease; text-decoration: none;
+  }
+  .social-logo-bar a:hover { transform: scale(1.12); background: #FF2A85; }
+  .social-logo-bar svg { width: 18px; height: 18px; fill: #F0F4F8; }
+
+  #drawer-menu {
+    position: fixed; inset: 0; z-index: 80; background: rgba(4, 5, 7, 0.96);
+    backdrop-filter: blur(18px); display: none; flex-direction: column;
+    justify-content: space-between; padding: 44px 54px; overflow-y: auto;
+  }
+  #drawer-menu.open { display: flex; }
+  .drawer-top { display: flex; justify-content: space-between; align-items: center; }
+  .drawer-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; margin: 32px 0; }
+  .drawer-col h4 {
+    font-size: 0.82rem; letter-spacing: 3px; margin-bottom: 14px;
+    background: linear-gradient(90deg, #FF2A85, #D438FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .drawer-col a { display: block; text-decoration: none; color: rgba(235, 240, 245, 0.82); font-size: 0.84rem; letter-spacing: 1.5px; margin-bottom: 10px; }
+  .drawer-col a:hover { color: #FF2A85; }
+  .drawer-bottom {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+    gap: 16px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.76rem; letter-spacing: 2px; color: rgba(220, 226, 232, 0.65);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="three-cube-stage"></canvas>
+
+<div id="pages-wrapper">
+  <section id="home" class="panel"></section>
+
+  <section id="audio" class="panel">
+    <div>
+      <h1 class="obsidian-3d-title">AUDIO</h1>
+      <p class="obsidian-3d-sub">Master Audio Recording, Editing &amp; Mixing</p>
+    </div>
+    <canvas id="osc-canvas" class="oscillator-strip"></canvas>
+    <div class="tile-grid">
+      <div class="tile" onclick="launchEngine('WAVESTORM','Spectral Waveform & Noise Reduction Engine Ready')"><div class="tag">WAVESTORM</div><h3>WAVESTORM</h3><p>Precision waveform editing &amp; spectral noise reduction.</p></div>
+      <div class="tile" onclick="launchEngine('MIXVORTEX','Unlimited Multi-Track Stem Console Active')"><div class="tag">MIXVORTEX</div><h3>MIXVORTEX</h3><p>Unlimited track multi-track music production.</p></div>
+      <div class="tile" onclick="launchEngine('SWITCH','Lossless WAV / FLAC / MP3 Batch Converter Online')"><div class="tag">SWITCH</div><h3>SWITCH</h3><p>Format conversion across lossless &amp; master stems.</p></div>
+      <div class="tile" onclick="launchEngine('RECORDPAD','24-Bit Studio Vocal Capture Armed')"><div class="tag">RECORDPAD</div><h3>RECORDPAD</h3><p>High-definition vocal &amp; narration capture.</p></div>
+      <div class="tile" onclick="launchEngine('BURN','Master Disc & DDP Image Authoring Ready')"><div class="tag">BURN</div><h3>BURN</h3><p>Master audio and optical disc authoring.</p></div>
+      <div class="tile" onclick="launchEngine('FX','Real-Time Mastering Rack: EQ, Reverb, Limiter Loaded')"><div class="tag">FX</div><h3>FX</h3><p>Real-time reverb, EQ, and compression racks.</p></div>
+    </div>
+    <div class="engine-console">
+      <input type="text" id="audio-prompt" placeholder="Enter track stem, BPM, or vocal FX preset to process...">
+      <button class="engine-action" onclick="queueRender('AUDIO')">RENDER AUDIO STEM</button>
+      <div class="status-readout" id="audio-status">KAYA // VORTEX 7 AUDIO ENGINE: STANDBY</div>
+    </div>
+  </section>
+
+  <section id="picture" class="panel">
+    <div>
+      <h1 class="obsidian-3d-title">PICTURE</h1>
+      <p class="obsidian-3d-sub">Professional Image Editing, Storyboards &amp; Slideshows</p>
+    </div>
+    <div class="tile-grid">
+      <a class="tile" href="html_bins/" target="_blank"><div class="tag">STORYBOARD</div><h3>STORYBOARD</h3><p>AI scene storyboard &amp; shot sequence generator.</p></a>
+      <div class="tile" onclick="launchEngine('PHOTOMATRIX','4K Layer Compositor & Color Grading Active')"><div class="tag">PHOTOMATRIX</div><h3>PHOTOMATRIX</h3><p>Layers, masks, filters, and color correction.</p></div>
+      <div class="tile" onclick="launchEngine('PHOTOSTAGE','Cinematic Pan-Zoom & Beat-Sync Slideshow Builder')"><div class="tag">PHOTOSTAGE</div><h3>PHOTOSTAGE</h3><p>Cinematic transitions, music, and pan-zoom.</p></div>
+      <div class="tile" onclick="launchEngine('ANIMATE','2D/3D Puppet Rigging & Keyframe Motion')"><div class="tag">ANIMATE</div><h3>ANIMATE</h3><p>2D/3D puppet rigging and motion graphics.</p></div>
+      <div class="tile" onclick="launchEngine('RESTORE','AI Upscale, Denoise & Color Restoration')"><div class="tag">RESTORE</h3><h3>RESTORE</h3><p>Automatic vintage photo coloring &amp; cleanup.</p></div>
+      <div class="tile" onclick="launchEngine('COLLAGE','Panoramic & Lookbook Grid Stitcher')"><div class="tag">COLLAGE</h3><h3>COLLAGE</h3><p>Custom layouts and panoramic stitching.</p></div>
+    </div>
+    <div class="engine-console">
+      <input type="text" id="picture-prompt" placeholder="Describe 4K artwork, poster, or Printify apparel graphic...">
+      <button class="engine-action" onclick="queueRender('PICTURE')">GENERATE 4K ASSET</button>
+      <div class="status-readout" id="picture-status">KAYA // VORTEX 7 PICTURE ENGINE: STANDBY</div>
+    </div>
+  </section>
+
+  <section id="video" class="panel">
+    <div>
+      <h1 class="obsidian-3d-title">VIDEO</h1>
+      <p class="obsidian-3d-sub">Motion Pictures &amp; Render Vault</p>
+    </div>
+    <div class="video-stage">
+      <video id="gallery-player" autoplay muted playsinline loop controls></video>
+    </div>
+    <div class="shuffle-bar">
+      <span id="prev-vid">&lt; PREV</span>
+      <span id="shuffle-vid">SHUFFLE</span>
+      <span id="next-vid">NEXT &gt;</span>
+    </div>
+  </section>
+
+  <section id="printify" class="panel">
+    <div>
+      <h1 class="obsidian-3d-title">PRINTIFY MERCH</h1>
+      <p class="obsidian-3d-sub">Automated Apparel, Drinkware &amp; Print-On-Demand Catalog</p>
+    </div>
+    <div class="tile-grid">
+      <div class="tile" onclick="pushPrintify('Heavyweight Studio Tee')"><div class="tag">APPAREL // 01</div><h3>HEAVYWEIGHT TEE</h3><p>Auto-stamped front/back chest graphic ready for Printify sync.</p></div>
+      <div class="tile" onclick="pushPrintify('Obsidian Oversized Hoodie')"><div class="tag">APPAREL // 02</div><h3>OVERSIZED HOODIE</h3><p>Full-back cinema artwork + sleeve KNOCKSSTUDiOS&trade; emblem.</p></div>
+      <div class="tile" onclick="pushPrintify('Studio Joggers & Pants')"><div class="tag">APPAREL // 03</div><h3>STUDIO PANTS</h3><p>All-over sublimation &amp; leg print template synced to catalog.</p></div>
+      <div class="tile" onclick="pushPrintify('Matte Black Ceramic Mug')"><div class="tag">DRINKWARE // 04</div><h3>COFFEE MUGS</h3><p>11oz &amp; 15oz wrap-around studio artwork ready for instant order.</p></div>
+      <div class="tile" onclick="pushPrintify('Museum Gallery Poster')"><div class="tag">WALL ART // 05</div><h3>GALLERY POSTERS</h3><p>24x36 archival matte prints generated from VORTEX 4K frames.</p></div>
+      <div class="tile" onclick="pushPrintify('Full Catalog Batch Push')"><div class="tag">AUTO-SYNC // 06</div><h3>BATCH PUBLISH ALL</h3><p>Push all studio graphics to Printify storefront in one click.</p></div>
+    </div>
+    <div class="engine-console">
+      <input type="text" id="printify-api-key" placeholder="Paste Printify API Token (or leave blank to queue local print-ready batch)...">
+      <button class="engine-action" onclick="pushPrintify('FULL_CATALOG')">SYNC TO PRINTIFY STORE</button>
+      <div class="status-readout" id="printify-status">PRINTIFY BRIDGE READY // AUTO-STAMPING MERCH ASSETS</div>
+    </div>
+  </section>
+</div>
+
+<!-- Bottom Dock: 4 clean items + Printify + Burger Menu, auto-hides -->
+<div class="bottom-dock" id="bottom-dock">
+  <div class="trademark-carved" onclick="goToPage(0)">KNOCKSSTUDiOS&trade;</div>
+  <nav class="bottom-nav">
+    <a onclick="goToPage(1)">AUDIO</a>
+    <a onclick="goToPage(2)">PICTURE</a>
+    <a onclick="goToPage(3)">VIDEO</a>
+    <a onclick="goToPage(4)">PRINTIFY</a>
+    <span class="burger-trigger" onclick="toggleDrawer()">&#9776; MENU</span>
+  </nav>
+</div>
+
+<!-- Drawer Menu with Full Suite, Social Logos -->
+<div id="drawer-menu">
+  <div class="drawer-top">
+    <div class="trademark-carved" style="font-size:1.35rem;">KNOCKSSTUDiOS&trade; // KAYA &amp; VORTEX 7</div>
+    <span class="burger-trigger" style="font-size:1.1rem;cursor:pointer;" onclick="toggleDrawer()">&#10005; CLOSE</span>
+  </div>
+  <div class="drawer-cols">
+    <div class="drawer-col">
+      <h4>STUDIO HUB</h4>
+      <a href="#" onclick="goToPage(0);toggleDrawer();">Home Stage (3D Cube)</a>
+      <a href="#" onclick="goToPage(1);toggleDrawer();">Audio Suite</a>
+      <a href="#" onclick="goToPage(2);toggleDrawer();">Picture Suite</a>
+      <a href="#" onclick="goToPage(3);toggleDrawer();">Video Gallery</a>
+      <a href="#" onclick="goToPage(4);toggleDrawer();">Printify Storefront</a>
+      <a href="html_bins/" target="_blank">AI Storyboard Generator</a>
+    </div>
+    <div class="drawer-col">
+      <h4>CREATOR PORTAL</h4>
+      <a href="#" onclick="alert('Member Sign In active');toggleDrawer();">Member Sign In</a>
+      <a href="#" onclick="alert('Creator Sign Up active');toggleDrawer();">Creator Sign Up</a>
+      <a href="#" onclick="alert('PWA App Ready');toggleDrawer();">Install Studio App</a>
+    </div>
+    <div class="drawer-col">
+      <h4>DEVELOPERS &amp; API</h4>
+      <a href="vortex_7_hub_registry.json" target="_blank">Hub Module Registry</a>
+      <a href="hub_config.json" target="_blank">Engine Configuration</a>
+    </div>
+    <div class="drawer-col">
+      <h4>LEGAL &amp; POLICIES</h4>
+      <a href="#terms" onclick="toggleDrawer();">Terms of Service</a>
+      <a href="#privacy" onclick="toggleDrawer();">Privacy Policy</a>
+    </div>
+  </div>
+  <div class="drawer-bottom">
+    <div>&copy; KNOCKSSTUDiOS&trade;. ALL RIGHTS RESERVED. (KAYA OMNI SUITE)</div>
+    <div class="social-logo-bar">
+      <!-- YouTube -->
+      <a href="https://youtube.com" target="_blank" title="YouTube"><svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+      <!-- TikTok -->
+      <a href="https://tiktok.com" target="_blank" title="TikTok"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a>
+      <!-- LinkedIn -->
+      <a href="https://linkedin.com" target="_blank" title="LinkedIn"><svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
+      <!-- X -->
+      <a href="https://x.com" target="_blank" title="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      <!-- Facebook -->
+      <a href="https://facebook.com" target="_blank" title="Facebook"><svg viewBox="0 0 24 24"><path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.378 14.5 5 15.5 5H18V0h-3.808C10.59 0 9 1.581 9 4.75V8z"/></svg></a>
+      <!-- Instagram -->
+      <a href="https://instagram.com" target="_blank" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+      <!-- Printify -->
+      <a href="https://printify.com" target="_blank" title="Printify"><svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.18 16.59h-2.36l-2.02-4.32-2.02 4.32H8.44l3.56-7.38-1.78-3.79h2.36l1.78 3.79 1.78-3.79h2.36l-3.56 7.38z"/></svg></a>
+    </div>
+  </div>
+</div>
+
+<video id="vid-stream-a" muted playsinline loop preload="auto" style="position:fixed;width:2px;height:2px;opacity:0.001;pointer-events:none;"></video>
+<video id="vid-stream-b" muted playsinline loop preload="auto" style="position:fixed;width:2px;height:2px;opacity:0.001;pointer-events:none;"></video>
+
+<script>
+let activePage = 0;
+const totalPages = 5;
+const wrapper = document.getElementById('pages-wrapper');
+const cubeCanvas = document.getElementById('three-cube-stage');
+
+function goToPage(idx) {
+  activePage = Math.max(0, Math.min(totalPages - 1, idx));
+  wrapper.style.transform = 	ranslateY(-vh);
+  cubeCanvas.style.opacity = activePage === 0 ? '1' : '0.16';
+  cubeCanvas.style.transition = 'opacity 0.6s ease';
+}
+
+let touchStartY = 0;
+window.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+  document.getElementById('bottom-dock').classList.add('touch-active');
+}, { passive: true });
+
+window.addEventListener('touchend', e => {
+  const deltaY = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(deltaY) > 55) {
+    if (deltaY > 0) goToPage(activePage + 1);
+    else goToPage(activePage - 1);
+  }
+}, { passive: true });
+
+let wheelLock = false;
+window.addEventListener('wheel', e => {
+  if (document.getElementById('drawer-menu').classList.contains('open')) return;
+  if (wheelLock) return;
+  if (Math.abs(e.deltaY) > 30) {
+    wheelLock = true;
+    if (e.deltaY > 0) goToPage(activePage + 1);
+    else goToPage(activePage - 1);
+    setTimeout(() => { wheelLock = false; }, 700);
+  }
+}, { passive: true });
+
+function toggleDrawer() {
+  document.getElementById('drawer-menu').classList.toggle('open');
+}
+
+function launchEngine(name, msg) {
+  const target = activePage === 1 ? 'audio-status' : (activePage === 2 ? 'picture-status' : 'printify-status');
+  const el = document.getElementById(target);
+  if (el) el.textContent = [] ;
+}
+
+function queueRender(type) {
+  const jobId = 'KX-' + Math.floor(100000 + Math.random() * 900000);
+  if (type === 'AUDIO') {
+    document.getElementById('audio-status').textContent = QUEUED []: Processing Audio Stem -> KAYA Engine;
+  } else if (type === 'PICTURE') {
+    document.getElementById('picture-status').textContent = QUEUED []: Generating 4K Asset -> KAYA Engine;
+  }
+}
+
+function pushPrintify(item) {
+  const token = document.getElementById('printify-api-key').value.trim();
+  const statusEl = document.getElementById('printify-status');
+  const batchId = 'PRT-' + Math.floor(10000 + Math.random() * 90000);
+  if (token) {
+    statusEl.textContent = LIVE API SYNC []: Pushing "" with KNOCKSSTUDiOS™ stamp to Printify...;
+  } else {
+    statusEl.textContent = STAGED []: "" print-ready 300DPI assets stamped & queued.;
+  }
+}
+
+const VIDEOS = ["media_feed/v_09.mp4","media_feed/v_14.mp4","media_feed/v_16.mp4"];
+let currentIdx = 0;
+const vidA = document.getElementById('vid-stream-a');
+const vidB = document.getElementById('vid-stream-b');
+const galleryPlayer = document.getElementById('gallery-player');
+
+if (VIDEOS.length > 0) {
+  vidA.src = VIDEOS[0];
+  vidA.load();
+  vidA.play().catch(()=>{});
+  if (galleryPlayer) {
+    galleryPlayer.src = VIDEOS[0];
+    galleryPlayer.load();
+    galleryPlayer.play().catch(()=>{});
+  }
+  const secondIdx = VIDEOS.length > 1 ? 1 : 0;
+  vidB.src = VIDEOS[secondIdx];
+  vidB.load();
+  vidB.play().catch(()=>{});
+}
+
+const renderer = new THREE.WebGLRenderer({ canvas: cubeCanvas, antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.z = 11.5;
+
+// Guaranteed Canvas Texture fallback so screen is never black if video is blocked
+const fallbackCanvas = document.createElement('canvas');
+fallbackCanvas.width = 512;
+fallbackCanvas.height = 512;
+const fctx = fallbackCanvas.getContext('2d');
+const fallbackTex = new THREE.CanvasTexture(fallbackCanvas);
+
+function updateFallbackTex() {
+  const t = Date.now() * 0.002;
+  const grad = fctx.createLinearGradient(0, 0, 512, 512);
+  grad.addColorStop(0, '#FF2A85');
+  grad.addColorStop(0.5, '#090B0E');
+  grad.addColorStop(1, '#00F0FF');
+  fctx.fillStyle = grad;
+  fctx.fillRect(0, 0, 512, 512);
+  fctx.fillStyle = '#FFFFFF';
+  fctx.font = 'bold 36px Segoe UI';
+  fctx.fillText('KNOCKSSTUDiOS™', 40, 250);
+  fctx.font = '24px Segoe UI';
+  fctx.fillText(' OMNI', 40, 300);
+  fallbackTex.needsUpdate = true;
+}
+
+const texA = new THREE.VideoTexture(vidA);
+const texB = new THREE.VideoTexture(vidB);
+texA.minFilter = THREE.LinearFilter; texA.magFilter = THREE.LinearFilter;
+texB.minFilter = THREE.LinearFilter; texB.magFilter = THREE.LinearFilter;
+
+const cols = 12;
+const rows = 8;
+const cubes = [];
+const frustumHeight = 2 * Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
+const frustumWidth = frustumHeight * camera.aspect;
+const tileW = frustumWidth / cols;
+const tileH = frustumHeight / rows;
+
+const group = new THREE.Group();
+scene.add(group);
+
+const matStreamA = new THREE.MeshBasicMaterial({ map: texA });
+const matStreamB = new THREE.MeshBasicMaterial({ map: texB });
+
+for (let r = 0; r < rows; r++) {
+  for (let c = 0; c < cols; c++) {
+    const geom = new THREE.BoxGeometry(tileW, tileH, Math.min(tileW, tileH));
+    const uvAttr = geom.attributes.uv;
+    const u0 = c / cols, u1 = (c + 1) / cols;
+    const v0 = 1 - (r + 1) / rows, v1 = 1 - r / rows;
+    for (let i = 0; i < uvAttr.count; i++) {
+      const u = uvAttr.getX(i) > 0.5 ? u1 : u0;
+      const v = uvAttr.getY(i) > 0.5 ? v1 : v0;
+      uvAttr.setXY(i, u, v);
+    }
+    const mesh = new THREE.Mesh(geom, [matStreamB, matStreamB, matStreamA, matStreamA, matStreamA, matStreamB]);
+    const homeX = -frustumWidth / 2 + tileW * (c + 0.5);
+    const homeY = frustumHeight / 2 - tileH * (r + 0.5);
+    mesh.position.set(homeX, homeY, 0);
+    mesh.userData = { homeX, homeY, targetX: homeX, targetY: homeY, targetZ: 0, targetRotX: 0, targetRotY: 0, targetRotZ: 0, targetScale: 1, col: c, row: r };
+    group.add(mesh);
+    cubes.push(mesh);
+  }
+}
+
+let showingA = true;
+let patternIndex = 0;
+let groupSpinZ = 0;
+
+function shuffleCubesToNext(nextIdx) {
+  if (VIDEOS.length === 0) return;
+  currentIdx = (nextIdx + VIDEOS.length) % VIDEOS.length;
+  const nextSrc = VIDEOS[currentIdx];
+  if (galleryPlayer) { galleryPlayer.src = nextSrc; galleryPlayer.play().catch(()=>{}); }
+  if (showingA) { vidB.src = nextSrc; vidB.load(); vidB.play().catch(()=>{}); }
+  else { vidA.src = nextSrc; vidA.load(); vidA.play().catch(()=>{}); }
+  showingA = !showingA;
+
+  const mode = patternIndex % 4;
+  patternIndex++;
+
+  cubes.forEach((cube, idx) => {
+    const u = cube.userData;
+    const angle = (idx / cubes.length) * Math.PI * 2;
+    if (mode === 0) {
+      u.targetScale = 0.42;
+      u.targetX = (u.col - (cols - 1) / 2) * (tileW * 0.44);
+      u.targetY = ((rows - 1) / 2 - u.row) * (tileH * 0.44);
+      u.targetZ = 3.2;
+      u.targetRotX += (u.col % 2 === 0 ? Math.PI * 2 : -Math.PI * 2);
+      u.targetRotY += Math.PI;
+      groupSpinZ += Math.PI * 0.5;
+    } else if (mode === 1) {
+      u.targetScale = 0.72;
+      u.targetX = u.homeX * 1.65; u.targetY = u.homeY * 1.65; u.targetZ = 2.0;
+      u.targetRotZ += (idx % 2 === 0 ? 1.0 : -1.0); u.targetRotY += Math.PI;
+    } else if (mode === 2) {
+      const radius = Math.min(frustumWidth, frustumHeight) * 0.34;
+      u.targetScale = 0.56;
+      u.targetX = Math.cos(angle) * radius; u.targetY = Math.sin(angle) * radius; u.targetZ = 2.8;
+      u.targetRotZ = angle; u.targetRotY += Math.PI;
+    } else {
+      u.targetScale = 0.82; u.targetZ = 2.4; u.targetRotX += Math.PI * 2; u.targetRotY += Math.PI;
+    }
+
+    setTimeout(() => {
+      u.targetX = u.homeX; u.targetY = u.homeY; u.targetZ = 0; u.targetScale = 1; u.targetRotZ = 0; groupSpinZ = 0;
+    }, 1150 + idx * 8);
+  });
+}
+
+if (VIDEOS.length > 1) {
+  setInterval(() => shuffleCubesToNext(currentIdx + 1), 8500);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  updateFallbackTex();
+  
+  if (vidA.readyState >= vidA.HAVE_CURRENT_DATA) {
+    texA.needsUpdate = true;
+  } else if (matStreamA.map !== fallbackTex) {
+    matStreamA.map = fallbackTex;
+    matStreamA.needsUpdate = true;
+  }
+
+  if (vidB.readyState >= vidB.HAVE_CURRENT_DATA) {
+    texB.needsUpdate = true;
+  } else if (matStreamB.map !== fallbackTex) {
+    matStreamB.map = fallbackTex;
+    matStreamB.needsUpdate = true;
+  }
+
+  group.rotation.z += (groupSpinZ - group.rotation.z) * 0.09;
+  cubes.forEach(cube => {
+    const u = cube.userData;
+    cube.position.x += (u.targetX - cube.position.x) * 0.13;
+    cube.position.y += (u.targetY - cube.position.y) * 0.13;
+    cube.position.z += (u.targetZ - cube.position.z) * 0.13;
+    cube.rotation.x += (u.targetRotX - cube.rotation.x) * 0.13;
+    cube.rotation.y += (u.targetRotY - cube.rotation.y) * 0.13;
+    cube.rotation.z += (u.targetRotZ - cube.rotation.z) * 0.13;
+    const s = cube.scale.x + (u.targetScale - cube.scale.x) * 0.13;
+    cube.scale.set(s, s, s);
+  });
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+const osc = document.getElementById('osc-canvas');
+if (osc) {
+  const octx = osc.getContext('2d');
+  let phase = 0;
+  function drawOsc() {
+    osc.width = osc.offsetWidth || 800;
+    osc.height = osc.offsetHeight || 92;
+    octx.clearRect(0, 0, osc.width, osc.height);
+    const grad = octx.createLinearGradient(0, 0, osc.width, 0);
+    grad.addColorStop(0, '#FF2A85'); grad.addColorStop(0.5, '#D438FF'); grad.addColorStop(1, '#FF6B4A');
+    octx.strokeStyle = grad; octx.lineWidth = 2.5; octx.shadowBlur = 14; octx.shadowColor = '#FF2A85';
+    octx.beginPath();
+    for (let x = 0; x < osc.width; x++) {
+      const y = osc.height / 2 + Math.sin(x * 0.025 + phase) * 18 * Math.sin(x * 0.005);
+      if (x === 0) octx.moveTo(x, y); else octx.lineTo(x, y);
+    }
+    octx.stroke();
+    phase += 0.065;
+    requestAnimationFrame(drawOsc);
+  }
+  drawOsc();
+}
+</script>
+</body>
+</html>
+
+
+
+
+

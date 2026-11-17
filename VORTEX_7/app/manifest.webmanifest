@@ -1,0 +1,15 @@
+﻿{
+    "theme_color":  "#FF2A85",
+    "name":  "KNOCKSSTUDiOS™ // KAYA VORTEX 7",
+    "display":  "standalone",
+    "short_name":  "VORTEX 7",
+    "background_color":  "#030406",
+    "start_url":  "./index.html",
+    "icons":  [
+                  {
+                      "type":  "image/png",
+                      "sizes":  "192x192",
+                      "src":  "../assets/vortex_7_main_icon.png"
+                  }
+              ]
+}

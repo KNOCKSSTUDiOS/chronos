@@ -1,0 +1,38 @@
+{
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "devPath": "http://localhost:1420",
+    "distDir": "../dist"
+  },
+  "package": {
+    "productName": "AXON LUMA",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": true
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "studio.hollywoodimaging.axonluma",
+      "icon": [],
+      "copyright": "© 2024–2026 HOLLYWOOD MOTION PICTURES. All rights reserved."
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "title": "AXON LUMA // KNOCKSSTUDiOS",
+        "width": 1280,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false
+      }
+    ]
+  }
+}

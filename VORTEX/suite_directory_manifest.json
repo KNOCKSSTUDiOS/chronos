@@ -1,0 +1,82 @@
+[
+  {
+    "Port": 4000,
+    "Name": "TEMPEST_STUDiO",
+    "Status": "Audited - Standalone"
+  },
+  {
+    "Port": 5000,
+    "Name": "INFINITY-CORE-ENGINE",
+    "Status": "Audited - Standalone"
+  },
+  {
+    "Port": 3000,
+    "Name": "VORTEX",
+    "Status": "Audited - Core Editor"
+  },
+  {
+    "Port": 0,
+    "Name": "AXON_LUMA",
+    "Status": "Audited - Desktop Pipeline"
+  },
+  {
+    "Port": 0,
+    "Name": "OMNI_CORE",
+    "Status": "Audited - Local Service v1.0.0"
+  },
+  {
+    "Port": 0,
+    "Name": "BAGHEERA_BIO_METAL",
+    "Status": "Audited - Linux Native"
+  },
+  {
+    "Port": 0,
+    "Name": "REBEL_GHOST",
+    "Status": "Audited - Unity Mobile"
+  },
+  {
+    "Port": 0,
+    "Name": "PRINTIFY_SYNC",
+    "Status": "Audited - Firebase Hosting"
+  },
+  {
+    "Port": 0,
+    "Name": "NEBULA_MQ44",
+    "Status": "Audited - Standalone"
+  },
+  {
+    "Port": 0,
+    "Name": "HOLLYWOOD_IMAGING",
+    "Status": "Audited - Domain Registry"
+  },
+  {
+    "Port": 0,
+    "Name": "KNOCKS_AI_CORE",
+    "Status": "Audited - Native Rust Binary"
+  },
+  {
+    "Port": 0,
+    "Name": "G_SYSTEMS",
+    "Status": "Audited - Audio DSP Pipeline"
+  },
+  {
+    "Port": 0,
+    "Name": "MEMPHIS_DSP_TUNER",
+    "Status": "Audited - VIV68DSP Config"
+  },
+  {
+    "Port": 0,
+    "Name": "WHEAT_PENNY_VAULT",
+    "Status": "Audited - Collection DB"
+  },
+  {
+    "Port": 0,
+    "Name": "TACO_STAND_LEGACY",
+    "Status": "Archived - Historical"
+  },
+  {
+    "Port": 0,
+    "Name": "HOLLYWOOD_MOTIION",
+    "Status": "Trademark - Production Line"
+  }
+]

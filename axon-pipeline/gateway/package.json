@@ -1,0 +1,10 @@
+﻿{
+  "name": "axon-luma",
+  "version": "1.0.0",
+  "description": "KNOCKSSTUDiOS AXON LUMA Engine",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}

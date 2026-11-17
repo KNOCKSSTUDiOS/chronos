@@ -1,0 +1,13 @@
+﻿{
+    "timestamp":  "2026-11-14 21:43:32",
+    "project":  "Sentinel of Ten Galaxies",
+    "suites_linked":  [
+                          "Blender 5.2",
+                          "Krita",
+                          "GIMP 3.2.6",
+                          "Inkscape",
+                          "NCH Suite"
+                      ],
+    "active_engine":  "Vortex 7",
+    "hardware":  "AMD Ryzen / Radeon HIP"
+}

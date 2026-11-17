@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VORTEX 7 | KNOCKSSTUDiOS Control Hub</title>
+<link rel="icon" type="image/png" href="assets/vortex_7_main_icon.png">
+<style>
+  :root {
+    --cyan: #00F0FF;
+    --blue: #1E90FF;
+    --amber: #FF9E00;
+    --bg: #0B0D10;
+    --surface: #132A2E;
+    --white: #F4F6F8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Consolas, monospace; }
+  body {
+    background-color: var(--bg);
+    background-image: url('branding/watermark_back_tiled.png');
+    background-repeat: repeat;
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(11, 13, 16, 0.94);
+    border-bottom: 2px solid var(--cyan);
+  }
+  .brand-lockup { display: flex; align-items: center; gap: 16px; }
+  .brand-lockup img.vortex-logo { width: 58px; height: 58px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.45)); }
+  .brand-title { font-size: 1.45rem; font-weight: 800; letter-spacing: 2px; color: var(--cyan); }
+  .brand-sub { font-size: 0.75rem; color: var(--amber); letter-spacing: 1.5px; }
+  main { flex: 1; padding: 32px; display: flex; flex-direction: column; gap: 28px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card {
+    background: rgba(19, 42, 46, 0.88);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    border-radius: 6px;
+    padding: 18px;
+  }
+  .card h3 { color: var(--cyan); margin-bottom: 6px; font-size: 0.95rem; }
+  .card p { color: var(--white); opacity: 0.85; font-size: 0.82rem; }
+  .section-label { color: var(--amber); font-size: 0.85rem; letter-spacing: 2px; font-weight: 700; border-bottom: 1px solid rgba(255, 158, 0, 0.3); padding-bottom: 6px; }
+  .tool-link {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+    background: rgba(11, 13, 16, 0.85);
+    border: 1px solid rgba(30, 144, 255, 0.35);
+    border-radius: 5px;
+    text-decoration: none;
+    color: var(--white);
+  }
+  .tool-link:hover { border-color: var(--cyan); background: rgba(19, 42, 46, 0.95); }
+  .tool-link strong { color: var(--cyan); font-size: 0.85rem; word-break: break-all; }
+  .tool-link span { color: var(--amber); font-size: 0.72rem; }
+  footer {
+    padding: 14px 32px;
+    background: rgba(11, 13, 16, 0.95);
+    border-top: 1px solid rgba(255, 158, 0, 0.4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .front-watermark { height: 28px; object-fit: contain; filter: invert(1); opacity: 0.9; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand-lockup">
+      <img class="vortex-logo" src="assets/vortex_7_main_icon.png" alt="VORTEX 7">
+      <div>
+        <div class="brand-title">VORTEX 7 // MAIN CONTROL HUB</div>
+        <div class="brand-sub">KNOCKSSTUDiOS &bull; INFINITY CORE ENGINE</div>
+      </div>
+    </div>
+    <img class="front-watermark" src="branding/watermark_front_knocksstudios.png" alt="KNOCKSSTUDiOS">
+  </header>
+  <main>
+    <div class="grid">
+      <div class="card"><h3>AI ENGINES &amp; MODULES</h3><p>1 Indexed Modules &amp; Scripts Active</p></div>
+      <div class="card"><h3>STORYBOARD &amp; INTRO BINS</h3><p>HTML Generators, MP4 Recorders &amp; Scene Tools</p></div>
+      <div class="card"><h3>STORAGE VAULT (V:\)</h3><p>Direct Explorer Vault &bull; Zero Local C:\ Bloat</p></div>
+      <div class="card"><h3>WATERMARK PROTECTION</h3><p>Tiled Background + Front Stamp Enforced</p></div>
+    </div>
+    <div class="section-label">CONNECTED AI GENERATORS &amp; HTML BINS</div>
+    <div class="grid">
+      
+    </div>
+  </main>
+  <footer>
+    <span>SYSTEM STATUS: ONLINE</span>
+    <img class="front-watermark" src="branding/watermark_front_knocksstudios.png" alt="KNOCKSSTUDiOS">
+  </footer>
+</body>
+</html>

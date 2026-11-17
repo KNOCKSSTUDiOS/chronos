@@ -1,0 +1,12 @@
+﻿{
+  "name": "axon-luma",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'dev'",
+    "build": "echo 'build'"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.0"
+  }
+}

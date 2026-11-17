@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --chassis-bg: #07080B;
+  --plate-bg: #141822;
+  --module-bg: #1A1F2C;
+  --ink: #E6ECF5;
+  --ink-dim: rgba(230, 236, 245, 0.62);
+  --neon-red: #FF1E42;
+  --electric-cyan: #00E5FF;
+  --soft-magenta: #E6399B;
+}
+
+html,
+body {
+  background-color: var(--chassis-bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--electric-cyan);
+  color: #07080B;
+}
+
+/* Outer dark metal casing with bright Neon Red perimeter LED tubing */
+.cnc-chassis {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 45%),
+    linear-gradient(165deg, #181D29 0%, #0D1017 55%, #07080B 100%);
+  border: 2px solid #FF1E42;
+  box-shadow:
+    0 0 0 1px rgba(255, 110, 130, 0.45),
+    0 0 18px rgba(255, 30, 66, 0.55),
+    0 0 48px rgba(255, 30, 66, 0.22),
+    inset 0 0 16px rgba(255, 30, 66, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* CNC brushed gunmetal / titanium segmented aluminum plate */
+.cnc-plate {
+  background-color: #141822;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 0px,
+      rgba(255, 255, 255, 0.018) 1px,
+      rgba(0, 0, 0, 0.08) 1px,
+      rgba(0, 0, 0, 0.08) 3px
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.01) 36%,
+      rgba(0, 0, 0, 0.22) 100%
+    ),
+    linear-gradient(180deg, #1E2434 0%, #141822 50%, #0E121B 100%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.78),
+    0 0 0 1px #050609,
+    0 10px 24px rgba(0, 0, 0, 0.55);
+}
+
+/* Elevated brushed steel sub-module */
+.cnc-module {
+  background-color: #1A1F2C;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.015) 0px,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(180deg, #252C3E 0%, #1A1F2C 55%, #131722 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.65),
+    0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+/* Deep recessed CNC groove / seam well */
+.cnc-recess {
+  background: linear-gradient(180deg, #06070B 0%, #0A0C12 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.92),
+    inset 0 1px 2px rgba(0, 0, 0, 0.95),
+    0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Illuminated dark optical glass viewport */
+.optical-glass {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(0, 229, 255, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(230, 57, 155, 0.08) 0%, transparent 45%),
+    radial-gradient(rgba(230, 236, 245, 0.07) 1px, transparent 0),
+    #06070B;
+  background-size: 100% 100%, 100% 100%, 28px 28px, 100% 100%;
+  box-shadow:
+    inset 0 0 32px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 22px rgba(0, 229, 255, 0.08);
+}
+
+/* Machined aluminum outer bezel ring for hybrid buttons */
+.machined-ring {
+  background: conic-gradient(
+    from 135deg,
+    #4F586E 0deg,
+    #1B202C 60deg,
+    #6B7692 140deg,
+    #181C26 225deg,
+    #495268 310deg,
+    #4F586E 360deg
+  );
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.7),
+    inset 0 1px 1px rgba(255, 255, 255, 0.32),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.85);
+}
+
+/* Specular glass lens reflection over button centers */
+.hw-glass-sheen {
+  background-image: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.04) 38%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+}
+
+/* Machined capsule pill groove slider (from hardware deck aesthetic) */
+.capsule-track-housing {
+  background: linear-gradient(180deg, #2B3244 0%, #151924 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+input[type="range"].hw-capsule-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"].hw-capsule-slider::-webkit-slider-runnable-track {
+  height: 12px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #050609 0%, #111520 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.95),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+input[type="range"].hw-capsule-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -6px;
+  border-radius: 7px;
+  background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #9FEFFF 32%, #00B8D9 75%, #0D1B26 100%);
+  border: 2px solid #4A546C;
+  box-shadow:
+    0 0 14px rgba(0, 229, 255, 0.75),
+    0 2px 6px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(255, 255, 255, 0.85);
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 150ms ease;
+}
+
+input[type="range"].hw-capsule-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 20px rgba(0, 229, 255, 0.95),
+    0 2px 8px rgba(0, 0, 0, 0.9),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+@keyframes ledPulse {
+  0%, 100% { opacity: 0.72; }
+  50% { opacity: 1; }
+}
+
+.animate-led-pulse {
+  animation: ledPulse 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-led-pulse,
+  .animate-spin {
+    animation: none !important;
+  }
+}
+
+/* Dark sleek scrollbar — NEVER bright white */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(110, 125, 155, 0.35) #07080B;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #07080B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(110, 125, 155, 0.35);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.5);
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

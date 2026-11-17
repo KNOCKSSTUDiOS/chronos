@@ -1,0 +1,1106 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KAYA // KNOCKSSTUDiOS™</title>
+<script src="assets/three.min.js"></script>
+<script>
+if (typeof THREE === 'undefined') {
+  document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+}
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #020305;
+    color: #F0F4F8;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  #three-cube-stage {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.55s ease;
+  }
+
+  #pages-wrapper {
+    position: relative;
+    z-index: 15;
+    width: 100vw;
+    height: 100vh;
+    transition: transform 0.68s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  section.panel {
+    width: 100vw;
+    height: 100vh;
+    padding: 32px 52px 84px 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: transparent;
+    overflow-y: auto;
+  }
+
+  #home { pointer-events: none; }
+
+  .brushed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid rgba(255, 42, 133, 0.35);
+    background: linear-gradient(180deg, rgba(22, 26, 34, 0.74) 0%, rgba(8, 10, 14, 0.9) 100%);
+    backdrop-filter: blur(12px);
+    padding: 16px 24px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 10px 30px rgba(0,0,0,0.85);
+  }
+
+  .obsidian-3d-title {
+    font-size: clamp(2rem, 4.4vw, 3.6rem);
+    font-weight: 900;
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    background: linear-gradient(160deg, #E2E8F0 0%, #64748B 35%, #F8FAFC 52%, #1E293B 85%, #94A3B8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.98));
+  }
+
+  .pink-i {
+    -webkit-text-fill-color: #FF2A85;
+    color: #FF2A85;
+    text-transform: lowercase;
+  }
+
+  .obsidian-3d-sub {
+    margin-top: 4px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #FF2A85;
+  }
+
+  .kingdom-viewport {
+    position: relative;
+    width: 100%;
+    height: 62vh;
+    background: radial-gradient(circle at 50% 35%, #1d1510 0%, #090b10 58%, #020305 100%);
+    border: 1px solid rgba(255, 42, 133, 0.28);
+    overflow: hidden;
+    perspective: 1200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.95), 0 20px 50px rgba(0,0,0,0.9);
+  }
+
+  .cam-hud {
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    right: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 30;
+    font-family: 'Consolas', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: #F8FAFC;
+    pointer-events: none;
+  }
+
+  .rec-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #FF2A85;
+    margin-right: 8px;
+    box-shadow: 0 0 12px #FF2A85;
+    animation: pulseRec 1.1s infinite alternate;
+  }
+
+  @keyframes pulseRec { from { opacity: 0.35; } to { opacity: 1; } }
+
+  .cam-crosshair {
+    position: absolute;
+    width: 130px;
+    height: 130px;
+    border: 1px solid rgba(255, 42, 133, 0.55);
+    pointer-events: none;
+    z-index: 25;
+    transition: transform 0.35s ease;
+    box-shadow: inset 0 0 18px rgba(255, 42, 133, 0.18);
+  }
+
+  .kingdom-interior {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 46px 32px 26px 32px;
+    background: linear-gradient(180deg, rgba(16,19,26,0.95) 0%, rgba(7,9,13,0.98) 100%);
+    transform: scale(0.92);
+    transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .kingdom-viewport.gate-open .kingdom-interior { transform: scale(1); }
+
+  .stage-wings {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .wing-tower {
+    background: linear-gradient(145deg, rgba(24,28,36,0.9), rgba(10,12,16,0.95));
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 14px 20px;
+    min-width: 170px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+
+  .wing-tower:hover { border-color: #FF2A85; transform: translateY(-3px); }
+  .wing-tower span { display: block; font-size: 0.66rem; letter-spacing: 3px; color: #FF2A85; font-weight: 800; }
+  .wing-tower strong { font-size: 1.05rem; letter-spacing: 3px; color: #F8FAFC; }
+
+  .concourse-center {
+    text-align: center;
+    max-width: 680px;
+  }
+
+  .concourse-center h2 {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    letter-spacing: 6px;
+    font-weight: 900;
+    color: #F8FAFC;
+  }
+
+  .style-pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .style-pill {
+    padding: 6px 14px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #E2E8F0;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .style-pill.active, .style-pill:hover {
+    background: #FF2A85;
+    border-color: #FF2A85;
+    color: #FFFFFF;
+  }
+
+  #visitor-avatar {
+    width: 64px;
+    height: 112px;
+    margin: 8px auto 0 auto;
+    opacity: 0;
+    transform: translateY(45px) scale(1.25);
+    transition: transform 1.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+  }
+
+  #visitor-avatar.walking {
+    opacity: 1;
+    transform: translateY(-6px) scale(0.86);
+  }
+
+  .fortress-gate {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background: linear-gradient(160deg, #1b1e24 0%, #0d0f13 60%, #07080a 100%);
+    border-bottom: 3px solid #FF2A85;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    transition: transform 1.25s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.95);
+  }
+
+  .fortress-gate.left {
+    left: 0;
+    justify-content: flex-end;
+    padding-right: 14px;
+    border-right: 2px solid rgba(255, 42, 133, 0.45);
+  }
+
+  .fortress-gate.right {
+    right: 0;
+    justify-content: flex-start;
+    padding-left: 14px;
+    border-left: 2px solid rgba(255, 42, 133, 0.45);
+  }
+
+  .kingdom-viewport.gate-open .fortress-gate.left { transform: translateX(-92%); }
+  .kingdom-viewport.gate-open .fortress-gate.right { transform: translateX(92%); }
+
+  .gate-stamp {
+    font-size: clamp(1.1rem, 2.5vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: #CBD5E1;
+    text-shadow: 0 2px 12px #000;
+  }
+
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+    margin: auto 0;
+  }
+
+  @media (max-width: 840px) {
+    .tile-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    section.panel { padding: 18px 16px 76px 16px; }
+  }
+
+  .tile {
+    background: linear-gradient(145deg, rgba(22, 26, 33, 0.8) 0%, rgba(8, 10, 14, 0.9) 100%);
+    backdrop-filter: blur(10px);
+    padding: 16px 15px;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 24px rgba(0,0,0,0.85);
+  }
+
+  .tile:hover {
+    transform: translateY(-4px) scale(1.015);
+    box-shadow: inset 0 1px 0 rgba(255,42,133,0.45), 0 0 22px rgba(255, 42, 133, 0.42);
+  }
+
+  .tile .tag {
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #FF2A85;
+    margin-bottom: 5px;
+  }
+
+  .tile h3 {
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #F8FAFC;
+  }
+
+  .tile p {
+    margin-top: 5px;
+    font-size: 0.76rem;
+    color: rgba(226, 232, 240, 0.78);
+    line-height: 1.38;
+  }
+
+  .engine-console {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(16, 20, 27, 0.88), rgba(6, 8, 12, 0.95));
+    backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .engine-console input {
+    background: rgba(10, 12, 18, 0.92);
+    color: #F8FAFC;
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 9px 14px;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    flex: 1;
+    min-width: 180px;
+    outline: none;
+  }
+
+  .engine-action {
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #FF2A85 0%, #D438FF 50%, #FF6B4A 100%);
+    color: #FFFFFF;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .engine-action:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 18px rgba(255, 42, 133, 0.65);
+  }
+
+  .status-readout {
+    font-size: 0.72rem;
+    letter-spacing: 1.8px;
+    color: #FF2A85;
+    font-weight: 800;
+    width: 100%;
+  }
+
+  .twin-galleries {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    width: 100%;
+    height: 62vh;
+  }
+
+  .gallery-wing {
+    position: relative;
+    background: rgba(10, 12, 18, 0.86);
+    border: 1px solid rgba(255,255,255,0.1);
+    perspective: 1200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .gallery-wing-label {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    color: #FF2A85;
+    z-index: 5;
+  }
+
+  .elastic-card {
+    position: absolute;
+    width: 220px;
+    height: 300px;
+    background: linear-gradient(145deg, #1b2028, #090b0f);
+    box-shadow: 0 20px 44px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.18);
+    cursor: grab;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), width 0.45s ease, height 0.45s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+  }
+
+  .elastic-card.pulled {
+    width: 440px;
+    height: 260px;
+    cursor: grabbing;
+    z-index: 40 !important;
+    box-shadow: 0 24px 60px rgba(255, 42, 133, 0.45);
+  }
+
+  .elastic-card video {
+    width: 100%;
+    height: 82%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .elastic-card .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 1.8px;
+    color: #E2E8F0;
+  }
+
+  .bottom-dock {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    padding: 0 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 60;
+    background: linear-gradient(to top, rgba(3,4,6,0.94), transparent);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  body:hover .bottom-dock,
+  .bottom-dock:hover,
+  .bottom-dock.touch-active {
+    opacity: 1;
+  }
+
+  .trademark-carved {
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: linear-gradient(175deg, #E2E8F0 0%, #64748B 48%, #CBD5E1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.98));
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .bottom-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .bottom-nav a, .burger-trigger {
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #CBD5E1;
+    transition: color 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .bottom-nav a:hover, .burger-trigger:hover {
+    color: #FF2A85;
+    transform: translateY(-2px);
+  }
+
+  #drawer-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(4, 5, 8, 0.96);
+    backdrop-filter: blur(20px);
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 38px 52px;
+    overflow-y: auto;
+  }
+
+  #drawer-menu.open { display: flex; }
+  .drawer-top { display: flex; justify-content: space-between; align-items: center; }
+  .drawer-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 24px; margin: 24px 0; }
+  .drawer-col h4 { font-size: 0.78rem; letter-spacing: 3px; margin-bottom: 12px; color: #FF2A85; }
+  .drawer-col a { display: block; text-decoration: none; color: rgba(235, 240, 245, 0.85); font-size: 0.8rem; letter-spacing: 1.5px; margin-bottom: 9px; cursor: pointer; }
+  .drawer-col a:hover { color: #FF2A85; }
+
+  .drawer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.74rem;
+    letter-spacing: 2px;
+    color: rgba(220, 226, 232, 0.72);
+  }
+
+  .social-icons { display: flex; align-items: center; gap: 14px; }
+  .social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: rgba(255,255,255,0.06);
+    color: #F8FAFC;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+  }
+  .social-icons a:hover { background: #FF2A85; color: #FFFFFF; transform: translateY(-2px); }
+  .social-icons svg { width: 16px; height: 16px; fill: currentColor; }
+</style>
+</head>
+<body>
+
+<canvas id="three-cube-stage"></canvas>
+
+<div id="pages-wrapper">
+  <section id="home" class="panel"></section>
+
+  <section id="kingdom-gate" class="panel">
+    <div class="brushed-header">
+      <div>
+        <h1 class="obsidian-3d-title">KAYA // KNOCKSSTUD<span class="pink-i">i</span>OS&trade;</h1>
+        <p class="obsidian-3d-sub">CREATE WITHOUT L<span class="pink-i">i</span>M<span class="pink-i">i</span>TS // SECURITY CHECKPOINT &amp; STUDIO CONCOURSE</p>
+      </div>
+    </div>
+
+    <div class="kingdom-viewport" id="kingdom-viewport">
+      <div class="cam-hud">
+        <div><span class="rec-dot"></span>REC ● CAM_01 // GATE SECURITY FEED</div>
+        <div id="cam-tracker-readout">STATUS: AWAITING VISITOR ENTRY</div>
+      </div>
+      <div class="cam-crosshair" id="cam-crosshair"></div>
+
+      <div class="kingdom-interior">
+        <div class="stage-wings">
+          <div class="wing-tower" onclick="goToPage(2)"><span>STAGE 07 // WEST WING</span><strong>AUD<span class="pink-i">i</span>O &amp; SOUND</strong></div>
+          <div class="wing-tower" onclick="goToPage(3)"><span>MAIN HALL // CORE</span><strong>P<span class="pink-i">i</span>CTURE &amp; KAYA</strong></div>
+          <div class="wing-tower" onclick="goToPage(4)"><span>STAGE 12 // EAST WING</span><strong>TW<span class="pink-i">i</span>N GALLER<span class="pink-i">i</span>ES</strong></div>
+        </div>
+
+        <div class="concourse-center">
+          <h2>KNOCKS HOLLYWOOD MOT<span class="pink-i">i</span>ON P<span class="pink-i">i</span>CTURES</h2>
+          <div class="style-pills">
+            <span class="style-pill active" onclick="setRenderStyle(this,'HYPER-REALISM')">HYPER-REALISM</span>
+            <span class="style-pill" onclick="setRenderStyle(this,'3D CINEMA')">3D CINEMA</span>
+            <span class="style-pill" onclick="setRenderStyle(this,'SCI-FI')">SCI-FI</span>
+            <span class="style-pill" onclick="setRenderStyle(this,'CYBERPUNK')">CYBERPUNK</span>
+            <span class="style-pill" onclick="setRenderStyle(this,'CARTOONS')">CARTOONS</span>
+            <span class="style-pill" onclick="setRenderStyle(this,'ANIME')">ANIME</span>
+          </div>
+          <svg id="visitor-avatar" viewBox="0 0 64 112" fill="none">
+            <circle cx="32" cy="18" r="11" stroke="#FF2A85" stroke-width="2.5" fill="rgba(255,42,133,0.18)"/>
+            <path id="avatar-torso" d="M16 36 H48 L44 74 H20 Z" stroke="#F8FAFC" stroke-width="2.2" fill="rgba(248,250,252,0.12)"/>
+            <line x1="25" y1="74" x2="22" y2="108" stroke="#F8FAFC" stroke-width="2.5"/>
+            <line x1="39" y1="74" x2="42" y2="108" stroke="#F8FAFC" stroke-width="2.5"/>
+          </svg>
+        </div>
+
+        <div class="stage-wings">
+          <div class="wing-tower" onclick="goToPage(4)"><span>GALLERY WEST</span><strong>LEFT ARCH<span class="pink-i">i</span>VE</strong></div>
+          <div class="wing-tower" onclick="goToPage(5)"><span>MERCH VAULT</span><strong>PR<span class="pink-i">i</span>NT<span class="pink-i">i</span>FY STORE</strong></div>
+          <div class="wing-tower" onclick="goToPage(4)"><span>GALLERY EAST</span><strong>R<span class="pink-i">i</span>GHT ARCH<span class="pink-i">i</span>VE</strong></div>
+        </div>
+      </div>
+
+      <div class="fortress-gate left"><span class="gate-stamp">KNOCKS</span></div>
+      <div class="fortress-gate right"><span class="gate-stamp">STUD<span class="pink-i">i</span>OS</span></div>
+    </div>
+
+    <div class="engine-console">
+      <button class="engine-action" onclick="enterKingdom('MALE')">ENTER AS MALE</button>
+      <button class="engine-action" onclick="enterKingdom('FEMALE')">ENTER AS FEMALE</button>
+      <button class="engine-action" onclick="closeKingdomGate()">LOCK GATE</button>
+      <div class="status-readout" id="kingdom-status">SELECT MALE OR FEMALE TO OPEN THE FORTRESS GATE &amp; ACTIVATE OVERHEAD CAMERA TRACKING</div>
+    </div>
+  </section>
+
+  <section id="audio" class="panel">
+    <div class="brushed-header">
+      <div>
+        <h1 class="obsidian-3d-title">AUD<span class="pink-i">i</span>O &amp; SOUND</h1>
+        <p class="obsidian-3d-sub">STAGE 07 // MASTER AUDIO, VOICE SYNTH &amp; SOUND ROOM</p>
+      </div>
+    </div>
+    <div class="tile-grid">
+      <div class="tile" onclick="launchEngine('WAVESTORM','Spectral Waveform & Noise Reduction Active')"><div class="tag">01 // ENGINE</div><h3>WAVESTORM</h3><p>Precision waveform editing &amp; spectral noise reduction.</p></div>
+      <div class="tile" onclick="launchEngine('MIXVORTEX','Unlimited Multi-Track Stem Console Online')"><div class="tag">02 // CONSOLE</div><h3>MIXVORTEX</h3><p>Unlimited multi-track music production &amp; beat sync.</p></div>
+      <div class="tile" onclick="launchEngine('VOICE SYNTH','KAYA AI Dubbing & Lip-Sync Voice Engine Ready')"><div class="tag">03 // VOICE</div><h3>VOICE SYNTH</h3><p>Real-time voice synthesis, character dubbing &amp; lip-sync.</p></div>
+      <div class="tile" onclick="launchEngine('SOUND ROOM','Spatial Foley & Cinema Atmos Surround Loaded')"><div class="tag">04 // SOUND</div><h3>SOUND ROOM</h3><p>3D spatial foley, sub-bass design &amp; cinema soundstage.</p></div>
+      <div class="tile" onclick="launchEngine('SWITCH','Lossless WAV / FLAC / MP3 Batch Converter Online')"><div class="tag">05 // CODEC</div><h3>SWITCH</h3><p>Lossless format conversion across master stems.</p></div>
+      <div class="tile" onclick="launchEngine('FX RACK','Real-Time Mastering Rack: EQ, Reverb, Limiter Loaded')"><div class="tag">06 // MASTERING</div><h3>FX RACK</h3><p>Real-time reverb, EQ, and compression racks.</p></div>
+    </div>
+    <div class="engine-console">
+      <input type="text" id="audio-prompt" placeholder="Enter track stem, sound effect, or voice prompt...">
+      <button class="engine-action" onclick="queueRender('AUDIO')">RENDER AUDIO</button>
+      <div class="status-readout" id="audio-status">STAGE 07 // AUDIO &amp; SOUND ROOM ONLINE</div>
+    </div>
+  </section>
+
+  <section id="picture" class="panel">
+    <div class="brushed-header">
+      <div>
+        <h1 class="obsidian-3d-title">P<span class="pink-i">i</span>CTURE</h1>
+        <p class="obsidian-3d-sub">KAYA HDR ULTRA 4K // MULTI-MODEL ROUTING &amp; HYPER-REALISTIC MATERIAL ENGINE</p>
+      </div>
+    </div>
+    <div class="tile-grid">
+      <div class="tile" onclick="launchEngine('KAYA 4K','HDR Ultra 4K Image & Motion Reel Engine Armed')"><div class="tag">01 // KAYA CORE</div><h3>KAYA STUDIO</h3><p>HDR Ultra 4K photo-to-vibe reel &amp; hyper-realistic material lighting.</p></div>
+      <div class="tile" onclick="launchEngine('HYPER-REALISM','Photorealistic Surface & Skin Grain Shader Active')"><div class="tag">02 // REALISM</div><h3>HYPER-REALISM</h3><p>True-to-life camera optics, reflections &amp; material physics.</p></div>
+      <div class="tile" onclick="launchEngine('SCI-FI & CYBERPUNK','Neon Cyberpunk & Sci-Fi World Shader Ready')"><div class="tag">03 // WORLD GEN</div><h3>SCI-FI / CYBER</h3><p>3D world synthesis, futuristic architecture &amp; volumetric light.</p></div>
+      <div class="tile" onclick="launchEngine('ANIME & CARTOON','Cel-Shaded Anime & 3D Cartoon Pipeline Loaded')"><div class="tag">04 // STYLIZED</div><h3>ANIME &amp; TOON</h3><p>Feature-grade 3D animation, anime &amp; stylized character transfer.</p></div>
+      <div class="tile" onclick="launchEngine('STORYBOARD','Shot-by-Shot Storyboard & Auto-Watermark Active')"><div class="tag">05 // DIRECTOR</div><h3>STORYBOARD</h3><p>Frame-by-frame shot generator with automatic studio stamp.</p></div>
+      <div class="tile" onclick="launchEngine('RESTORE 4K','480p-to-4K Upscale & Color Restoration Ready')"><div class="tag">06 // UPSCALE</div><h3>RESTORE 4K</h3><p>AI upscale, denoise &amp; monochrome-to-4K color restoration.</p></div>
+    </div>
+    <div class="engine-console">
+      <input type="text" id="picture-prompt" placeholder="Enter KAYA HDR Ultra 4K prompt or style mode...">
+      <button class="engine-action" onclick="queueRender('PICTURE')">DISPATCH TO KAYA</button>
+      <div class="status-readout" id="picture-status">KAYA // HDR ULTRA 4K ENGINE ONLINE</div>
+    </div>
+  </section>
+
+  <section id="video" class="panel">
+    <div class="brushed-header">
+      <div>
+        <h1 class="obsidian-3d-title">V<span class="pink-i">i</span>DEO &amp; TW<span class="pink-i">i</span>N GALLER<span class="pink-i">i</span>ES</h1>
+        <p class="obsidian-3d-sub">LEFT &amp; RIGHT ELASTIC 3D GALLERIES // DRAG ANY CARD TO PULL INTO LANDSCAPE</p>
+      </div>
+    </div>
+    <div class="twin-galleries">
+      <div class="gallery-wing" id="gallery-left">
+        <div class="gallery-wing-label">GALLERY WEST // LEFT WING</div>
+      </div>
+      <div class="gallery-wing" id="gallery-right">
+        <div class="gallery-wing-label">GALLERY EAST // RIGHT WING</div>
+      </div>
+    </div>
+    <div class="engine-console">
+      <button class="engine-action" onclick="resetGalleryCards()">RESET BOTH GALLERIES</button>
+      <button class="engine-action" onclick="shuffleCubesToNext(currentIdx + 1)">SHUFFLE 3D CUBES</button>
+      <div class="status-readout" id="video-status">GRAB ANY FILE CARD IN LEFT OR RIGHT GALLERY — ROTATES INTO LANDSCAPE &amp; LOCKS WHERE RELEASED</div>
+    </div>
+  </section>
+
+  <section id="printify" class="panel">
+    <div class="brushed-header">
+      <div>
+        <h1 class="obsidian-3d-title">PR<span class="pink-i">i</span>NT<span class="pink-i">i</span>FY</h1>
+        <p class="obsidian-3d-sub">KNOCKSSTUD<span class="pink-i">i</span>OS&trade; STORE // AI AUTO-MERCH GENERATOR &amp; STOREFRONT</p>
+      </div>
+    </div>
+    <div class="tile-grid">
+      <div class="tile" onclick="pushPrintify('Heavyweight Studio Tee')"><div class="tag">APPAREL // 01</div><h3>HEAVYWEIGHT TEE</h3><p>Auto-stamped front/back chest graphic synced to Printify.</p></div>
+      <div class="tile" onclick="pushPrintify('Obsidian Oversized Hoodie')"><div class="tag">APPAREL // 02</div><h3>OVERSIZED HOODIE</h3><p>Full-back cinema artwork + sleeve KNOCKSSTUDiOS&trade; emblem.</p></div>
+      <div class="tile" onclick="pushPrintify('Studio Joggers & Pants')"><div class="tag">APPAREL // 03</div><h3>STUDIO PANTS</h3><p>All-over sublimation &amp; leg print template synced to store.</p></div>
+      <div class="tile" onclick="pushPrintify('Matte Black Ceramic Mug')"><div class="tag">DRINKWARE // 04</div><h3>COFFEE MUGS</h3><p>11oz &amp; 15oz wrap-around studio artwork ready for instant order.</p></div>
+      <div class="tile" onclick="pushPrintify('Museum Gallery Poster')"><div class="tag">WALL ART // 05</div><h3>GALLERY POSTERS</h3><p>24x36 archival matte prints generated from KAYA 4K frames.</p></div>
+      <div class="tile" onclick="pushPrintify('Full Catalog AI Auto-Publish')"><div class="tag">AUTO-MERCH // 06</div><h3>AI STORE BUILDER</h3><p>Generates designs in your palette &amp; stocks store under your approval.</p></div>
+    </div>
+    <div class="engine-console">
+      <input type="text" id="printify-api-key" placeholder="Printify Shop Token (or leave blank to stage 300DPI print-ready batch)...">
+      <button class="engine-action" onclick="pushPrintify('FULL_CATALOG')">PUBLISH TO STORE</button>
+      <div class="status-readout" id="printify-status">PRINTIFY // MERCH BRIDGE READY</div>
+    </div>
+  </section>
+</div>
+
+<div class="bottom-dock" id="bottom-dock">
+  <div class="trademark-carved" onclick="goToPage(0)">KNOCKSSTUD<span class="pink-i">i</span>OS&trade;</div>
+  <nav class="bottom-nav">
+    <a onclick="goToPage(2)">AUDIO</a>
+    <a onclick="goToPage(3)">PICTURE</a>
+    <a onclick="goToPage(4)">VIDEO</a>
+    <a onclick="goToPage(5)">PRINTIFY</a>
+    <span class="burger-trigger" onclick="toggleDrawer()">&#9776; MENU</span>
+  </nav>
+</div>
+
+<div id="drawer-menu">
+  <div class="drawer-top">
+    <div class="trademark-carved" style="font-size:1.3rem;">KNOCKSSTUD<span class="pink-i">i</span>OS&trade;</div>
+    <span class="burger-trigger" style="font-size:1.05rem;" onclick="toggleDrawer()">&#10005; CLOSE</span>
+  </div>
+  <div class="drawer-cols">
+    <div class="drawer-col">
+      <h4>STUDIO CONCOURSE</h4>
+      <a onclick="goToPage(0);toggleDrawer();">Home Stage (3D Video Cubes)</a>
+      <a onclick="goToPage(1);toggleDrawer();">Kingdom Front Gate &amp; Security Cam</a>
+      <a onclick="goToPage(2);toggleDrawer();">Audio &amp; Sound Room (Stage 07)</a>
+      <a onclick="goToPage(3);toggleDrawer();">Picture &amp; KAYA 4K Studio</a>
+      <a onclick="goToPage(4);toggleDrawer();">Twin Left &amp; Right 3D Galleries</a>
+      <a onclick="goToPage(5);toggleDrawer();">Printify Merch Storefront</a>
+    </div>
+    <div class="drawer-col">
+      <h4>VISUAL MODES</h4>
+      <a onclick="goToPage(1);toggleDrawer();">Hyper-Realism &amp; Cinema 4K</a>
+      <a onclick="goToPage(1);toggleDrawer();">3D World &amp; Shader Synthesis</a>
+      <a onclick="goToPage(1);toggleDrawer();">Sci-Fi &amp; Cyberpunk</a>
+      <a onclick="goToPage(1);toggleDrawer();">Cartoons &amp; Anime</a>
+    </div>
+    <div class="drawer-col">
+      <h4>PORTAL ACCESS</h4>
+      <a onclick="goToPage(1);toggleDrawer();">Visitor Entry (Male / Female Avatar)</a>
+      <a onclick="goToPage(3);toggleDrawer();">Creator Sign Up / Render Desk</a>
+      <a onclick="goToPage(3);toggleDrawer();">Member Sign Up / Subscriptions</a>
+      <a onclick="goToPage(5);toggleDrawer();">Watermark &amp; Brand Vault</a>
+    </div>
+    <div class="drawer-col">
+      <h4>LEGAL &amp; IP</h4>
+      <a onclick="toggleDrawer();">Terms of Service</a>
+      <a onclick="toggleDrawer();">Privacy Policy</a>
+      <a onclick="toggleDrawer();">Commercial Render Licensing</a>
+      <a onclick="toggleDrawer();">KNOCKSSTUDiOS&trade; IP Protection</a>
+    </div>
+  </div>
+  <div class="drawer-bottom">
+    <div>&copy; KNOCKS HOLLYWOOD MOT<span class="pink-i">i</span>ON P<span class="pink-i">i</span>CTURES // KNOCKSSTUD<span class="pink-i">i</span>OS&trade;. ALL RIGHTS RESERVED.</div>
+    <div class="social-icons">
+      <a href="https://youtube.com" target="_blank" title="YouTube"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
+      <a href="https://tiktok.com" target="_blank" title="TikTok"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a>
+      <a href="https://instagram.com" target="_blank" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8 0 3.2 0 3.6-.1 4.8-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.9.1-3.2 0-3.6 0-4.8-.1-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12c0-3.2 0-3.6.1-4.8C2.4 4 4 2.4 7.2 2.3c1.2-.1 1.6-.1 4.8-.1zM12 0C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.2 4.4 2.6 6.8 7 7 1.2.1 1.6.1 4.9.1s3.7 0 4.9-.1c4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9s0-3.7-.1-4.9C23.7 2.7 21.3.3 16.9.1 15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z"/></svg></a>
+      <a href="https://x.com" target="_blank" title="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      <a href="https://facebook.com" target="_blank" title="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg></a>
+      <a href="https://linkedin.com" target="_blank" title="LinkedIn"><svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg></a>
+      <a href="https://printify.com" target="_blank" title="Printify"><svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.3L18.5 8 12 11.7 5.5 8 12 4.3zM5 9.8l6 3.4v6.5l-6-3.4V9.8zm8 9.9v-6.5l6-3.4v6.5l-6 3.4z"/></svg></a>
+    </div>
+  </div>
+</div>
+
+<video id="vid-stream-a" muted playsinline loop preload="auto" style="position:fixed;width:2px;height:2px;opacity:0.001;pointer-events:none;"></video>
+<video id="vid-stream-b" muted playsinline loop preload="auto" style="position:fixed;width:2px;height:2px;opacity:0.001;pointer-events:none;"></video>
+
+<script>
+let activePage = 0;
+const totalPages = 6;
+const wrapper = document.getElementById('pages-wrapper');
+const cubeCanvas = document.getElementById('three-cube-stage');
+
+function goToPage(idx) {
+  activePage = Math.max(0, Math.min(totalPages - 1, idx));
+  wrapper.style.transform = 	ranslateY(-vh);
+  cubeCanvas.style.opacity = activePage === 0 ? '1' : '0.12';
+}
+
+let touchStartY = 0;
+window.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+  document.getElementById('bottom-dock').classList.add('touch-active');
+}, { passive: true });
+
+window.addEventListener('touchend', e => {
+  if (e.target.closest('.elastic-card')) return;
+  const deltaY = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(deltaY) > 55) {
+    if (deltaY > 0) goToPage(activePage + 1);
+    else goToPage(activePage - 1);
+  }
+}, { passive: true });
+
+let wheelLock = false;
+window.addEventListener('wheel', e => {
+  if (document.getElementById('drawer-menu').classList.contains('open')) return;
+  if (wheelLock) return;
+  if (Math.abs(e.deltaY) > 30) {
+    wheelLock = true;
+    if (e.deltaY > 0) goToPage(activePage + 1);
+    else goToPage(activePage - 1);
+    setTimeout(() => { wheelLock = false; }, 700);
+  }
+}, { passive: true });
+
+function toggleDrawer() {
+  document.getElementById('drawer-menu').classList.toggle('open');
+}
+
+const kv = document.getElementById('kingdom-viewport');
+const crosshair = document.getElementById('cam-crosshair');
+kv.addEventListener('mousemove', e => {
+  const rect = kv.getBoundingClientRect();
+  const dx = (e.clientX - rect.left - rect.width / 2) * 0.45;
+  const dy = (e.clientY - rect.top - rect.height / 2) * 0.45;
+  crosshair.style.transform = 	ranslate(px, px);
+});
+
+function enterKingdom(gender) {
+  kv.classList.add('gate-open');
+  const avatar = document.getElementById('visitor-avatar');
+  const torso = document.getElementById('avatar-torso');
+  torso.setAttribute('d', gender === 'FEMALE' ? 'M20 36 H44 L50 74 H14 Z' : 'M15 36 H49 L44 74 H20 Z');
+  avatar.classList.remove('walking');
+  void avatar.offsetWidth;
+  avatar.classList.add('walking');
+  document.getElementById('cam-tracker-readout').textContent = LOCKED:  VISITOR // RECORDING ENTRY;
+  document.getElementById('kingdom-status').textContent = GATE OPEN —  AVATAR LOGGED INTO KNOCKSSTUDiOS™ CONCOURSE;
+}
+
+function closeKingdomGate() {
+  kv.classList.remove('gate-open');
+  document.getElementById('visitor-avatar').classList.remove('walking');
+  document.getElementById('cam-tracker-readout').textContent = 'STATUS: GATE LOCKED // PERIMETER SECURE';
+}
+
+function setRenderStyle(el, styleName) {
+  document.querySelectorAll('.style-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('kingdom-status').textContent = ACTIVE STUDIO MODE: ;
+}
+
+function launchEngine(name, msg) {
+  const target = activePage === 2 ? 'audio-status' : 'picture-status';
+  const el = document.getElementById(target);
+  if (el) el.textContent = [] ;
+}
+
+function queueRender(type) {
+  const jobId = 'KX-' + Math.floor(100000 + Math.random() * 900000);
+  if (type === 'AUDIO') {
+    const p = document.getElementById('audio-prompt').value || 'Master Studio Stem';
+    document.getElementById('audio-status').textContent = QUEUED []: "3000" -> WAVESTORM / MIXVORTEX;
+  } else {
+    const p = document.getElementById('picture-prompt').value || 'HDR Ultra 4K KAYA Render';
+    document.getElementById('picture-status').textContent = DISPATCHED []: "3000" -> KAYA 4K + AUTO-STAMP;
+  }
+}
+
+function pushPrintify(item) {
+  const token = document.getElementById('printify-api-key').value.trim();
+  const statusEl = document.getElementById('printify-status');
+  const batchId = 'PRT-' + Math.floor(10000 + Math.random() * 90000);
+  if (token) {
+    statusEl.textContent = LIVE PRINTIFY SYNC []: Publishing "" with KNOCKSSTUDiOS™ stamp...;
+  } else {
+    statusEl.textContent = STAGED []: "" 300DPI PNGs stamped & queued in V:\\09_EXPORTS\\PRINTIFY_READY;
+  }
+}
+
+const VIDEOS = ["media_feed/v_09.mp4","media_feed/v_14.mp4","media_feed/v_16.mp4"];
+let currentIdx = 0;
+const vidA = document.getElementById('vid-stream-a');
+const vidB = document.getElementById('vid-stream-b');
+
+if (VIDEOS.length > 0) {
+  vidA.src = VIDEOS[0]; vidA.load(); vidA.play().catch(()=>{});
+  const secondIdx = VIDEOS.length > 1 ? 1 : 0;
+  vidB.src = VIDEOS[secondIdx]; vidB.load(); vidB.play().catch(()=>{});
+}
+
+const galleryCards = [];
+function populateWing(containerId, items, prefix) {
+  const stage = document.getElementById(containerId);
+  items.forEach((src, i) => {
+    const card = document.createElement('div');
+    card.className = 'elastic-card';
+    const baseOffsetX = (i - (items.length - 1) / 2) * 75;
+    const baseRotY = (i - (items.length - 1) / 2) * -12;
+    card.dataset.baseX = baseOffsetX;
+    card.dataset.rotY = baseRotY;
+    card.style.zIndex = 10 + i;
+    card.style.transform = 	ranslate3d(px, 0px, 0px) rotateY(deg);
+
+    const v = document.createElement('video');
+    v.src = src; v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    v.play().catch(()=>{});
+
+    const meta = document.createElement('div');
+    meta.className = 'card-meta';
+    meta.innerHTML = <span>_0.MP4</span><span style="color:#FF2A85;">PULL</span>;
+
+    card.appendChild(v);
+    card.appendChild(meta);
+    stage.appendChild(card);
+    galleryCards.push(card);
+
+    let dragging = false, startX = 0, startY = 0, curX = baseOffsetX, curY = 0;
+    card.addEventListener('pointerdown', e => {
+      dragging = true;
+      card.setPointerCapture(e.pointerId);
+      startX = e.clientX - curX;
+      startY = e.clientY - curY;
+      card.classList.add('pulled');
+    });
+    card.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      curX = e.clientX - startX;
+      curY = e.clientY - startY;
+      const pullProgress = Math.min(1, Math.max(0, -curY / 110));
+      const rotY = (1 - pullProgress) * baseRotY;
+      card.style.transform = 	ranslate3d(px, px, 90px) rotateY(deg);
+    });
+    card.addEventListener('pointerup', e => {
+      if (!dragging) return;
+      dragging = false;
+      card.releasePointerCapture(e.pointerId);
+      card.style.transform = 	ranslate3d(px, px, 90px) rotateY(0deg);
+      document.getElementById('video-status').textContent = LOCKED _0.MP4 IN LANDSCAPE;
+    });
+  });
+}
+
+function buildTwinGalleries() {
+  const items = VIDEOS.length > 0 ? VIDEOS : ['media_feed/v_09.mp4', 'media_feed/v_14.mp4', 'media_feed/v_16.mp4'];
+  const mid = Math.ceil(items.length / 2);
+  populateWing('gallery-left', items.slice(0, mid), 'WEST');
+  populateWing('gallery-right', items.slice(mid).length ? items.slice(mid) : items, 'EAST');
+}
+
+function resetGalleryCards() {
+  galleryCards.forEach(card => {
+    card.classList.remove('pulled');
+    const bx = parseFloat(card.dataset.baseX);
+    const ry = parseFloat(card.dataset.rotY);
+    card.style.transform = 	ranslate3d(px, 0px, 0px) rotateY(deg);
+  });
+}
+buildTwinGalleries();
+
+window.addEventListener('load', () => {
+  if (typeof THREE === 'undefined') return;
+  const renderer = new THREE.WebGLRenderer({ canvas: cubeCanvas, antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 11.5;
+
+  const texA = new THREE.VideoTexture(vidA);
+  const texB = new THREE.VideoTexture(vidB);
+  texA.minFilter = THREE.LinearFilter; texA.magFilter = THREE.LinearFilter;
+  texB.minFilter = THREE.LinearFilter; texB.magFilter = THREE.LinearFilter;
+
+  function fitVideoTexture(videoEl, tex) {
+    if (!videoEl.videoWidth || !videoEl.videoHeight) return;
+    const screenAspect = window.innerWidth / window.innerHeight;
+    const vidAspect = videoEl.videoWidth / videoEl.videoHeight;
+    if (vidAspect > screenAspect) {
+      const scaleX = screenAspect / vidAspect;
+      tex.repeat.set(scaleX, 1);
+      tex.offset.set((1 - scaleX) / 2, 0);
+    } else {
+      const scaleY = vidAspect / screenAspect;
+      tex.repeat.set(1, scaleY);
+      tex.offset.set(0, (1 - scaleY) / 2);
+    }
+  }
+
+  vidA.addEventListener('loadedmetadata', () => fitVideoTexture(vidA, texA));
+  vidB.addEventListener('loadedmetadata', () => fitVideoTexture(vidB, texB));
+
+  const cols = 12, rows = 8, cubes = [];
+  const frustumHeight = 2 * Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
+  const frustumWidth = frustumHeight * camera.aspect;
+  const tileW = frustumWidth / cols, tileH = frustumHeight / rows;
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const matStreamA = new THREE.MeshBasicMaterial({ map: texA });
+  const matStreamB = new THREE.MeshBasicMaterial({ map: texB });
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const geom = new THREE.BoxGeometry(tileW, tileH, Math.min(tileW, tileH));
+      const uvAttr = geom.attributes.uv;
+      const u0 = c / cols, u1 = (c + 1) / cols;
+      const v0 = 1 - (r + 1) / rows, v1 = 1 - r / rows;
+      for (let i = 0; i < uvAttr.count; i++) {
+        const u = uvAttr.getX(i) > 0.5 ? u1 : u0;
+        const v = uvAttr.getY(i) > 0.5 ? v1 : v0;
+        uvAttr.setXY(i, u, v);
+      }
+      const mesh = new THREE.Mesh(geom, [matStreamB, matStreamB, matStreamA, matStreamA, matStreamA, matStreamB]);
+      const homeX = -frustumWidth / 2 + tileW * (c + 0.5);
+      const homeY = frustumHeight / 2 - tileH * (r + 0.5);
+      mesh.position.set(homeX, homeY, 0);
+      mesh.userData = { row: r, col: c, homeX, homeY, targetX: homeX, targetY: homeY, targetZ: 0, targetRotX: 0, targetRotY: 0, targetRotZ: 0, targetScale: 1 };
+      group.add(mesh);
+      cubes.push(mesh);
+    }
+  }
+
+  let showingA = true, patternIndex = 0, groupSpinZ = 0;
+
+  window.shuffleCubesToNext = function(nextIdx) {
+    if (VIDEOS.length === 0) return;
+    currentIdx = (nextIdx + VIDEOS.length) % VIDEOS.length;
+    const nextSrc = VIDEOS[currentIdx];
+    if (showingA) { vidB.src = nextSrc; vidB.load(); vidB.play().catch(()=>{}); }
+    else { vidA.src = nextSrc; vidA.load(); vidA.play().catch(()=>{}); }
+    showingA = !showingA;
+
+    const mode = patternIndex % 4;
+    patternIndex++;
+
+    cubes.forEach((cube, idx) => {
+      const u = cube.userData;
+      const angle = (idx / cubes.length) * Math.PI * 2;
+      if (mode === 0) {
+        u.targetScale = 0.42;
+        u.targetX = (u.col - (cols - 1) / 2) * (tileW * 0.44);
+        u.targetY = ((rows - 1) / 2 - u.row) * (tileH * 0.44);
+        u.targetZ = 3.2;
+        u.targetRotX += (u.col % 2 === 0 ? Math.PI * 2 : -Math.PI * 2);
+        u.targetRotY += Math.PI;
+        groupSpinZ += Math.PI * 0.5;
+      } else if (mode === 1) {
+        u.targetScale = 0.72;
+        u.targetX = u.homeX * 1.65;
+        u.targetY = u.homeY * 1.65;
+        u.targetZ = 2.0;
+        u.targetRotZ += (idx % 2 === 0 ? 1.0 : -1.0);
+        u.targetRotY += Math.PI;
+      } else if (mode === 2) {
+        const radius = Math.min(frustumWidth, frustumHeight) * 0.34;
+        u.targetScale = 0.56;
+        u.targetX = Math.cos(angle) * radius;
+        u.targetY = Math.sin(angle) * radius;
+        u.targetZ = 2.8;
+        u.targetRotZ = angle;
+        u.targetRotY += Math.PI;
+      } else {
+        u.targetScale = 0.82;
+        u.targetZ = 2.4;
+        u.targetRotX += Math.PI * 2;
+        u.targetRotY += Math.PI;
+      }
+      setTimeout(() => {
+        u.targetX = u.homeX; u.targetY = u.homeY; u.targetZ = 0; u.targetScale = 1; u.targetRotZ = 0; groupSpinZ = 0;
+      }, 1150 + idx * 8);
+    });
+  };
+
+  if (VIDEOS.length > 1) {
+    setInterval(() => window.shuffleCubesToNext(currentIdx + 1), 8500);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (vidA.readyState >= vidA.HAVE_CURRENT_DATA) texA.needsUpdate = true;
+    if (vidB.readyState >= vidB.HAVE_CURRENT_DATA) texB.needsUpdate = true;
+    group.rotation.z += (groupSpinZ - group.rotation.z) * 0.09;
+    cubes.forEach(cube => {
+      const u = cube.userData;
+      cube.position.x += (u.targetX - cube.position.x) * 0.13;
+      cube.position.y += (u.targetY - cube.position.y) * 0.13;
+      cube.position.z += (u.targetZ - cube.position.z) * 0.13;
+      cube.rotation.x += (u.targetRotX - cube.rotation.x) * 0.13;
+      cube.rotation.y += (u.targetRotY - cube.rotation.y) * 0.13;
+      cube.rotation.z += (u.targetRotZ - cube.rotation.z) * 0.13;
+      const s = cube.scale.x + (u.targetScale - cube.scale.x) * 0.13;
+      cube.scale.set(s, s, s);
+    });
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    fitVideoTexture(vidA, texA);
+    fitVideoTexture(vidB, texB);
+  });
+});
+</script>
+</body>
+</html>
